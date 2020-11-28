@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Chatアプリ</title>
+  <link rel='stylesheet' href='css/style.css'>
+
+  <!-- Firebase Appは必須であり、常に最初になければなりません -->
+  <script src="https://www.gstatic.com/firebasejs/5.5.2/firebase-app.js"></script>
+
+  <!-- ログインに必要なJSとCSS -->
+  <script src="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth__ja.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth.css" />
+
+</head>
+
+<body>
+  <!-- ブラウザの画面に見える内容 -->
+
+
+  <div class="tab_wrap">
+    <input id="tab1" type="radio" name="tab_btn" checked>
+    <input id="tab2" type="radio" name="tab_btn"> 
+  
+    <div class="tab_area">
+      <label class="tab1_label" for="tab1">入力</label>
+      <label class="tab2_label" for="tab2">閲覧</label>
+    </div>
+    <div class="panel_area">
+      <div id="panel1" class="tab_panel">
+        <form method="POST" name="form1" onsubmit="return check()">
+          <table class="ask" id="ask_table" rules="rows">
+            <tr align="left">
+              <th>タイトル</th>
+              <td><input type="text" name="key"  id="username" size="30"></td>
+            </tr>
+            <tr align="left">
+              <th>内容</th>
+              <td><textarea name="memo" id="text" rows="5" cols="41"></textarea></td>
+            </tr>
+            <tr align="left">
+              <th>今日の点数</th>
+              <td><input type="text" name="point"  id="point" size="42"></td>
+            </tr>
+            <tr align="left">
+              <th>日付</th>
+              <td><input type="date"  name="date" id="date" min= &{kyou}; style="width:300px"></td>
+            </tr>
+            <tr align="left">
+              <th>記入者</th>
+              <td>
+                <select name="example" name="gender" id="gender">
+                  <option value="man">man</option>
+                  <option value="woman">woman</option>
+                </select>
+              </td>
+            </tr>
+          </table>
+          <!-- 送信ボタン -->
+          <button id="send">送信</button>
+        </form>
+      </div>
+      <div id="panel2" class="tab_panel">
+        <div id="icon"></div>
+        <div id="output"></div>
+      </div>
+    </div>
+  </div>
+    
+
+
+  
+
+  <!-- 保存されたデータが表示される箇所 -->
+  
+  </div>　　　　
+  <!-- ブラウザの画面に見える内容 -->
+
+
+  <!-- JQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- JQuery -->
+
+  <!--** 以下Firebase **-->
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <!-- firebaseのverが変わるので、数字がどんどん変化します🙋‍♀️ -->
+  <!-- ここにfirebaseのscriptを貼り付ける -->
+  <script src="https://www.gstatic.com/firebasejs/7.14.2/firebase.js"></script>
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#config-web-app -->
+
+
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyAYQ96M8rfXybTJ6xRHJ5iERbBLzmKjWJ8",
+      authDomain: "dev-chat-31.firebaseapp.com",
+      databaseURL: "https://dev-chat-31.firebaseio.com",
+      projectId: "dev-chat-31",
+      storageBucket: "dev-chat-31.appspot.com",
+      messagingSenderId: "245861826242",
+      appId: "1:245861826242:web:68516323f9ec3ff6fb055b"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    //firebaseのデーターベース（保存させる場所）を使いますよ
+    const newPostRef = firebase.database().ref();
+
+    // ここから下にjqueryの処理を書いて練習します
+
+    // 送信ボタンをクリックされたら次の処理をする
+    $("#send").on("click", function () {
+      // データを登録で送る
+      newPostRef.push({
+        username: $("#username").val(), //名前
+        text: $("#text").val(), //テキストエリア
+        point: $("#point").val(), //点数
+        date: $("#date").val(), //日付
+        gender: $("#gender").val(), //性別
+      })
+      $("#text").val(""); //空にする
+      $("#username").val(""); //空にする
+      $("#point").val(""); //空にする
+      $("#date").val(""); //空にする
+      $("#gender").val(""); //空にする
+    });
+
+    // 受信処理
+    newPostRef.on("child_added", function (data) {
+      let v = data.val(); //ここに保存されたデータが全て入ってくる
+      // let k = data.key; //今回は使いません
+
+      // console.log(v); //vの変数に入っているオブジェクトを全てみる
+      // console.log(v.gender); 
+      // genderを1件づつ取り出す
+      var count = 0; //行数を数えたい
+      var pic_man = "<img src='./imgs/man.jpg' width='80' height='80'>"
+      var pic_woman = "<img src='./imgs/woman.jpg' width='80' height='80'>"
+      for (const elem of Object.values(v)){
+        // console.log("ここに画像をいれる");
+        if(count == 4){
+          count = 0;
+          console.log('ここに画像をいれる',count);
+          if(gender == 'man'){
+            // $("#output").append('男です！');
+            $("#output").append(pic_man);
+          }
+          else{
+            // $("#output").append('女です！');
+            $("#output").append(pic_woman);
+          }
+        // 改行
+        var linebreak = document.createElement("br");
+        $("#output").append(linebreak);
+
+        }else{
+          if(count == 1){
+           gender = elem; 
+          }
+          console.log(elem);
+          count = count+1;
+          console.log('countは',count);
+          $("#output").append(elem, ' ');
+          // if elms=1なら変数genderに入れておく
+          
+        }
+        
+      }
+
+      var pic = "<img src='./imgs/tuku.jpg' width='50' height='50'>"
+      let str = `${pic}<br><p>${v.username}<br>${v.text}<br>${v.point}<br>${v.date}<br>${v.gender}</p>`;
+
+      // ここでデータをhtmlに埋め込む
+      // $("#icon").append("<img src='./imgs/tuku.jpg' width='50' height='50'>");
+      // $("#output").append(str);
+    })
+
+    $("#text").on("keydown", function (e) {
+      console.log(e, "event");
+
+      if (e.keyCode === 13) {
+        newPostRef.push({
+          username: $("#username").val(), //名前
+          text: $("#text").val(), //テキストエリア
+          point: $("#point").val(), //点数
+          date: $("#date").val(), //日付
+          gender: $("#gender").val(), //性別
+        })
+        $("#text").val(""); //空にする
+        $("#username").val(""); //空にする
+        $("#point").val(""); //空にする
+        $("#date").val(""); //空にする
+        $("#gender").val(""); //空にする
+      }
+    })
+
+
+    $(function(){
+
+/* twitter */
+!function(d,s,id){
+  var js, fjs=d.getElementsByTagName(s)[0];
+  if(!d.getElementById(id)){
+    js=d.createElement(s);
+    js.id=id;
+    js.src="//platform.twitter.com/widgets.js";
+    fjs.parentNode.insertBefore(js,fjs);
+  }
+}(document,"script","twitter-wjs");
+
+/* facebook */
+(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/ja_JP/all.js#xfbml=1&appId=236187796455704";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+/* g-plus */
+window.___gcfg = {lang: 'ja'};
+(function() {
+  var po = document.createElement('script');
+  po.type = 'text/javascript';
+  po.async = true;
+  po.src = 'https://apis.google.com/js/plusone.js';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(po, s);
+})();
+
+/* hatena */
+(function() {
+  var po = document.createElement('script');
+  po.type = 'text/javascript';
+  po.async = true;
+  po.charset = 'utf-8';
+  po.src = 'http://b.st-hatena.com/js/bookmark_button.js';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(po, s);
+})();
+
+});
+
+
+
+
+  </script>
+
+  <!-- Initialize Firebase -->
+  <!-- <script src="/__/firebase/init.js"></script>
+  <script src="/__/firebase/7.14.2/firebase-auth.js"></script> -->
+
+</body>
+
+</html>
